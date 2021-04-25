@@ -25,13 +25,15 @@ class KucoinAPIException(Exception):
         `message` format
 
     """
-    def __init__(self, response):
+    def __init__(self, status_code: int, content):
+        self.status_code = status_code
+        self.content = content
         self.code = ''
         self.message = 'Unknown Error'
         try:
-            json_res = response.json()
+            json_res = json.loads(content)
         except ValueError:
-            self.message = response.content
+            pass
         else:
             if 'error' in json_res:
                 self.message = json_res['error']
@@ -46,10 +48,6 @@ class KucoinAPIException(Exception):
                     self.message += " " + json.dumps(json_res['data'])
                 except ValueError:
                     pass
-
-        self.status_code = response.status_code
-        self.response = response
-        self.request = getattr(response, 'request', None)
 
     def __str__(self):  # pragma: no cover
         return 'KucoinAPIException {}: {}'.format(self.code, self.message)

@@ -165,15 +165,15 @@ class Client(object):
         """
 
         if not str(response.status).startswith('2'):
-            raise KucoinAPIException(response)
+            raise KucoinAPIException(response.status, await response.text())
         try:
             res = await response.json()
 
             if 'code' in res and res['code'] != "200000":
-                raise KucoinAPIException(response)
+                raise KucoinAPIException(response.status, await response.text())
 
             if 'success' in res and not res['success']:
-                raise KucoinAPIException(response)
+                raise KucoinAPIException(response.status, await response.text())
 
             # by default return full response
             # if it's a normal response we have a data attribute, return that
@@ -181,7 +181,7 @@ class Client(object):
                 res = res['data']
             return res
         except ValueError:
-            raise KucoinRequestException('Invalid Response: %s' % response.text)
+            raise KucoinRequestException('Invalid Response: %s' % await response.text())
 
     async def _get(self, path, signed=False, **kwargs):
         return await self._request('get', path, signed, **kwargs)
