@@ -2,6 +2,7 @@ import base64
 import calendar
 import hashlib
 import hmac
+import logging
 import time
 from datetime import datetime
 
@@ -11,6 +12,8 @@ from .exceptions import (
     KucoinAPIException, KucoinRequestException, MarketOrderException, LimitOrderException
 )
 from .utils import compact_json_dict, flat_uuid
+
+LOG = logging.getLogger(__name__)
 
 
 class Client(object):
@@ -154,7 +157,12 @@ class Client(object):
         if signed and method != 'get' and kwargs['data']:
             kwargs['data'] = compact_json_dict(kwargs['data'])
 
+        LOG.debug(f'> rest type [%s], uri [%s], params [%s], headers [%s], data [%s]'
+                  % (method, uri, kwargs.get('params'), kwargs.get('headers'), kwargs.get('data')))
         response = await getattr(self.session, method)(uri, **kwargs)
+        body = await response.text()
+        LOG.debug(f"<: status [{response.status}], response [{body}]")
+
         return await self._handle_response(response)
 
     @staticmethod
