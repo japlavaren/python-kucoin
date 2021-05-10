@@ -282,7 +282,7 @@ class Client(object):
 
     # User Account Endpoints
 
-    async def get_accounts(self):
+    async def get_accounts(self, currency: str = None):
         """Get a list of accounts
 
         https://docs.kucoin.com/#accounts
@@ -317,8 +317,12 @@ class Client(object):
         :raises:  KucoinResponseException, KucoinAPIException
 
         """
+        data = {}
 
-        return await self._get('accounts', True)
+        if currency is not None:
+            data['currency'] = currency
+
+        return await self._get('accounts', True, data=data)
 
     async def get_account(self, account_id):
         """Get an individual account
